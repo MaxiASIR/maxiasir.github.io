@@ -7,7 +7,7 @@ categories: practicas
 
 # IAW-2021-P3
 # Para el backend:
-![imagen de ejemplo](/maxiasir.github.io/img/ejemplo.PNG)
+![]({{ site.url }}/img/ejemplo.PNG)
 /assets/logo.png)
 Actualizamos los paquetes
 
