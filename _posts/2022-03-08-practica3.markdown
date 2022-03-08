@@ -9,6 +9,7 @@ categories: practicas
 # Para el backend:
 ![]({{ site.url }}/img/ejemplo.PNG)
 /assets/logo.png)
+
 Actualizamos los paquetes
 
     apt update
