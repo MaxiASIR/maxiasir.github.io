@@ -49,3 +49,6 @@ Reiniciamos apache
             </Proxy>
             ProxyPass / balancer://mycluster/
         </VirtualHost>
+
+
+![]({{ site.url }}/img/ejemplo2.png)
