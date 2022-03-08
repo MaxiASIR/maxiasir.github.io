@@ -1,0 +1,51 @@
+---
+layout: post
+title:  "Markdown práctica 5"
+date:   2022-03-08 06:30:04 -0600
+categories: practicas
+---
+
+# IAW-2021-P5 - Balanceador de carga con Apache
+Para esta práctica, usaremos los mismos scripts de la práctica anterior "[IAW-2021-P4](https://github.com/MaxiASIR/IAW-2021-P4.git)", con la diferencia de que añadimos una máquina más que actua como balenceador de carga entre los dos front-end. Para ello instalaremos y configuraremos lo siguiente en la máquina que vayamos a destinar como balanceador:
+
+Instalamos apache2
+    
+    apt update
+    apt upgrade
+    apt install apache2
+
+Activamos los modulos necesarios para el balanceo
+    
+    a2enmod proxy
+    a2enmod proxy_http
+    a2enmod proxy_ajp
+    a2enmod rewrite
+    a2enmod deflate
+    a2enmod headers
+    a2enmod proxy_balancer
+    a2enmod proxy_connect
+    a2enmod proxy_html
+    a2enmod lbmethod_byrequests
+
+Movemos el archivo de configuración de apache descargado a la ruta correcta
+
+    cd /home/ubuntu
+    cp IAW-2021-P5/Software/Balanceador/000-default.conf /etc/apache2/sites-available/
+
+Reiniciamos apache
+    
+    systemctl restart apache2
+
+# El archivo 000-default.conf:
+ Cambiaremos XXX.XXX.XXX.XXX por la IP pública de nuestros front-end.
+ 
+        <VirtualHost *:80>
+            <Proxy balancer://mycluster>
+                # Server 1
+                BalancerMember http://XXX.XXX.XXX.XXX
+                
+                # Server 2
+                BalancerMember http://XXX.XXX.XXX.XXX
+            </Proxy>
+            ProxyPass / balancer://mycluster/
+        </VirtualHost>
