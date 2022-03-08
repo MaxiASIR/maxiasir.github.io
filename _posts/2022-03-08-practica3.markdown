@@ -1,0 +1,163 @@
+---
+layout: post
+title:  "Welcome to Jekyll!"
+date:   2022-03-07 05:30:04 -0600
+categories: jekyll update
+---
+
+# IAW-2021-P3
+# Para el backend:
+
+Actualizamos los paquetes
+
+    apt update
+    apt upgrade -y
+
+Instalamos mysql server
+    
+    apt install mysql-server
+
+Cambiamos la contraseña del usuario root
+
+    mysql -u root <<< "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';"
+    mysql -u root <<< "FLUSH PRIVILEGES;"
+
+Configuramos MySQL para aceptar conexiones desde cualquier interfaz de red
+
+    sed -i "s/127.0.0.1/0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf
+
+Despligue de la aplicación web
+    
+    cd /home/ubuntu
+    rm -rf iaw-practica-lamp
+    git clone https://github.com/josejuansanchez/iaw-practica-lamp
+
+Importamos el script de base de datos
+    
+    mysql -u root -p(Contraseña de mysql sin los paréntesis) < /home/ubuntu/iaw-practica-lamp/db/database.sql
+
+Reiniciamos MySQL
+    
+    systemctl restart mysql
+
+# Para el frontend:
+        
+
+Actualizamos los paquete.
+        
+        apt upgrade
+        apt update
+
+Instalamos Apache
+        
+        apt install apache2
+
+Instalamos los módulos de PHP
+        
+        apt install php libapache2-mod-php php-mysql -y
+
+INSTALACION DE ADMINER
+
+Creamos la ruta donde queremos instalarlo
+        
+        mkdir /var/www/html/adminer
+
+Nos metemos en la ruta recién creada
+        
+        cd /var/www/html/adminer
+
+Descargamos el archivo de Adminer
+        
+        wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1.php
+
+Lo renombramos a index.php
+        
+        mv adminer-4.8.1-mysql.php index.php
+
+Actualizamos el propietario y el grupo del directorio /var/www/html
+        
+        chown www-data:www-data /var/www/html -R
+
+Reiniciamos Apache.
+        
+        systemctl restart apache2
+
+INSTALACION DE PHPMYADMIN
+
+Instalamos unzip
+        
+        apt install unzip -y
+
+Descargamos phpMyAdmin
+        
+        cd /home/Ubuntu
+        rm -rf phpMyAdmin-5.1.1-all-languages.zip
+        wget https://files.phpmyadmin.net/phpMyAdmin/5.1.1/phpMyAdmin-5.1.1-all-languages.zip
+
+Lo descomprimimos
+        
+        unzip phpMyAdmin-5.1.1-all-languages.zip
+
+Borramos el zip ya que ya no lo necesitamos más
+    
+        rm -rf phpMyAdmin-5.1.1-all-languages.zip
+
+Movemos phpMyAdmin a /var/www/html
+        
+        mv phpMyAdmin-5.1.1-all-languages.zip/ /var/www/html/phpmyadmin
+
+Configuramos el archivo config.inc.php con la ip del servidor mysql
+        
+        cd /var/www/html/phpmyadmin
+        mv config.sample.inc.php config.inc.php
+        sed -i "s/localhost/$IP_MYSQL/" /var/www/html/phpmyadmin/config.inc.php
+        sed -i "s/localhost/$IP_MYSQL/" /var/www/html/config.php
+
+INSTALACION DE GOACCESS
+
+Instalamos goaccess
+        
+        wget -O - https://deb.goaccess.io/gnugpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/goaccess.gpg >/dev/null
+        echo "deb [signed-by=/usr/share/keyrings/goaccess.gpg] https://deb.goaccess.io/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/goaccess.list
+        apt-get update
+        apt-get install goaccess
+
+Creamos el archivo log de GoAccess
+
+        mkdir -p /var/www/html/stats
+        screen goaccess /var/log/apache2/access.log -o /var/www/html/stats/index.html --log-format=COMBINED --real-time-html
+        htpasswd -bc $HTTPASSWORD_DIR/.htpasswd $HTTPASSWORD_USER $HTTPASSWORD_PASSWD
+
+Configuramos Apache moviendo el archivo 000-default a la ruta correcta (se ha descargado al principio junto con el repositorio)
+        
+        cd
+        cp /IAW-2021-P3/Software/Front/000-default.conf /etc/apache2/sites-available/
+
+Reiniciamos Apache
+        
+        systemctl restart apache2
+
+INSTALACION DE LA APLICACION WEB
+
+La descargamos del repositorio en la ruta especificada y sacamos el contenido de la carpeta src
+        
+        cd /var/www/html
+        rm -rf iaw-practica-lamp
+        git clone https://github.com/josejuansanchez/iaw-practica-lamp
+        mv /var/www/html/iaw-practica-lamp/src/* /var/www/html/
+
+Editamos el archivo config.php para que apunte a la dirección del backend
+        
+        sed -i "s/(IP privada del servidor backend)/" /var/www/html/config.php
+
+Eliminamos el index.html para que cargue la aplicación web
+        
+        rm -rf /var/www/html/index.html 
+
+Editamos los permisos
+        
+        chown www-data:www-data * -R
+
+Finalmente reiniciamos apache
+        
+        systemctl restart apache2
